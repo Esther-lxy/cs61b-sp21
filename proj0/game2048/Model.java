@@ -174,9 +174,43 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if (emptySpaceExists(b)) {
+            return true;
+        } else if (sameAdjacent(b)) {
+            return true;
+        }
         return false;
     }
 
+    /* find whether a Borad b has two adjacent tiles with same value */
+    public static boolean sameAdjacent(Board b) {
+        if (!emptySpaceExists(b)) {
+            for (int row = 0; row < b.size(); row++) {
+                for (int col = 0; col < b.size(); col++) {
+                    if (mergable(row, col, b)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /* find whether the tile at (row, col) in board b has adjacent tiles with same value */
+    public static boolean mergable(int row, int col, Board b) {
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j<=1; j++) {
+                if ((i == 0 || j == 0) && (i != j) &&
+                        (row + i >= 0 && row + i <b.size()) &&
+                        (col + j >= 0 && col + j < b.size())) {
+                    if (b.tile(row + i, col + j).value() == b.tile(row, col).value()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     @Override
      /** Returns the model as a string, used for debugging. */
