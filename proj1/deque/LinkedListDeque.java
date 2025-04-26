@@ -59,7 +59,7 @@ public class LinkedListDeque<T> {
         size++;
     }
 
-    public boolean is_Empty() {
+    public boolean isEmpty() {
         if (size == 0) {
             return true;
         }
@@ -127,6 +127,7 @@ public class LinkedListDeque<T> {
     }
     */
 
+    /*
     public boolean equals(Object o) {
         if (!(o instanceof Deque)) {
             return false;
@@ -140,5 +141,5 @@ public class LinkedListDeque<T> {
         }
         return true;
     }
-
+    */
 }

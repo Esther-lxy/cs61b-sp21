@@ -120,6 +120,7 @@ public class ArrayDeque<T> {
     }
     */
 
+    /*
     public boolean equals(Object o) {
         if (!(o instanceof Deque)) {
             return false;
@@ -133,5 +134,6 @@ public class ArrayDeque<T> {
         }
         return true;
     }
+     */
 }
 
