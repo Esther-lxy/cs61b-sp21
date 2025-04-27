@@ -1,6 +1,6 @@
 package deque;
 
-public class ArrayDeque<T> {
+public class ArrayDeque<T> implements Deque<T> {
     T[] items;
     int size;
     int first;
@@ -14,13 +14,16 @@ public class ArrayDeque<T> {
     private void resize(int capacity) {
         T[] right = (T[]) new Object[capacity];
         if (first < last) {
-            System.arraycopy(items, first, right, first, last + 1);
+            System.arraycopy(items, first, right, 0, size);
+            first = 0;
+            last = size - 1;
         } else {
-            int newFirst = capacity - size + first;
+            int newFirst = (capacity - items.length + first);
             System.arraycopy(items, first, right, newFirst, size - last - 1);
             System.arraycopy(items, 0, right, 0, last + 1);
             first = newFirst;
         }
+        items = right;
     }
 
     public void addFirst(T item) {
@@ -104,6 +107,7 @@ public class ArrayDeque<T> {
         T temp = items[last];
         items[last] = null;
         last = (last - 1 + items.length) % items.length;
+        size--;
         return temp;
     }
 
