@@ -1,5 +1,8 @@
 package deque;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 public class ArrayDeque<T> implements Deque<T> {
     T[] items;
     int size;
@@ -118,26 +121,46 @@ public class ArrayDeque<T> implements Deque<T> {
         return items[(first + index) % items.length];
     }
 
-    /*
-    public Iterator<T> iterator() {
-        pass;
-    }
-    */
 
-    /*
-    public boolean equals(Object o) {
-        if (!(o instanceof Deque)) {
+    public Iterator<T> iterator() {
+        return new ArrayIterator();
+    }
+
+    private class ArrayIterator implements Iterator<T> {
+        int wizpos = 0;
+
+        public boolean hasNext() {
+            if (wizpos < size) {
+                return true;
+            }
             return false;
-        } else if (o.size != size) {
+        }
+
+        public T next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("You've iterated all elements!");
+            }
+            int i = wizpos;
+            wizpos++;
+            return get(i);
+        }
+    }
+
+
+
+    public boolean equals(Object o) {
+        if (!(o instanceof Deque otherA)) {
+            return false;
+        } else if (otherA.size() != size) {
             return false;
         }
         for (int i = 0; i < size; i++) {
-            if (!(o.get(i)).equals(this.get(i))) {
+            if (!(otherA.get(i)).equals(this.get(i))) {
                 return false;
             }
         }
         return true;
     }
-     */
+
 }
 

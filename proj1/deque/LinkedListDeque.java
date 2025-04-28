@@ -1,5 +1,8 @@
 package deque;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 public class LinkedListDeque<T> implements Deque<T> {
     public class Node {
         public Node prev;
@@ -121,25 +124,48 @@ public class LinkedListDeque<T> implements Deque<T> {
         return sentinel.next.get(index);
     }
 
-    /*
-    public Iterator<T> iterator() {
-        pass;
-    }
-    */
 
-    /*
+    public Iterator<T> iterator() {
+        return new LLIterator();
+    }
+
+    private class LLIterator implements Iterator<T> {
+        Node wizpos = sentinel.next;
+
+        public boolean hasNext() {
+            if (wizpos == sentinel) {
+                return false;
+            }
+            return true;
+        }
+
+        public T next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("You've iterated all elements!");
+            }
+            T re = wizpos.item;
+            wizpos = wizpos.next;
+            return re;
+        }
+
+    }
+
     public boolean equals(Object o) {
-        if (!(o instanceof Deque)) {
+        if (!(o instanceof Deque uddao )) {
             return false;
-        } else if (o.size != size) {
+        } else if (uddao.size() != size()) {
             return false;
         }
-        for (int i = 0; i < size; i++) {
-            if (!(o.get(i)).equals(this.get(i))) {
+        for (int i = 0; i < size(); i++) {
+            if (!(uddao.get(i)).equals(this.get(i))) {
                 return false;
             }
         }
         return true;
     }
-    */
+
+
+
+
+
 }
