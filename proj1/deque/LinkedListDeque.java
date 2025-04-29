@@ -151,13 +151,15 @@ public class LinkedListDeque<T> implements Deque<T> {
     }
 
     public boolean equals(Object o) {
-        if (!(o instanceof Deque uddao )) {
+        if (!(o instanceof Deque)) {
             return false;
-        } else if (uddao.size() != size()) {
+        }
+        Deque otherL = (Deque) o;
+        if (otherL.size() != size()) {
             return false;
         }
         for (int i = 0; i < size(); i++) {
-            if (!(uddao.get(i)).equals(this.get(i))) {
+            if (!(otherL.get(i)).equals(this.get(i))) {
                 return false;
             }
         }

@@ -57,7 +57,6 @@ public class MaxArrayDexTest {
         int re = IntmaxA.max(IntComB);
         assertEquals(re, 8);
     }
-
 }
 
 
