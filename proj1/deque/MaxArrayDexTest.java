@@ -20,14 +20,14 @@ public class MaxArrayDexTest {
 
     @Test
     public void testIntBigger() {
-        Comparator<Integer> IntCom = new IntBigger<Integer>();
-        MaxArrayDeque<Integer> IntmaxA = new MaxArrayDeque<>(IntCom);
-        IntmaxA.addLast(3);
-        IntmaxA.addLast(5);
-        IntmaxA.addFirst(6);
-        IntmaxA.addFirst(8);
-        IntmaxA.addFirst(4);
-        int re = IntmaxA.max();
+        Comparator<Integer> intCom = new IntBigger<Integer>();
+        MaxArrayDeque<Integer> intmaxA = new MaxArrayDeque<>(intCom);
+        intmaxA.addLast(3);
+        intmaxA.addLast(5);
+        intmaxA.addFirst(6);
+        intmaxA.addFirst(8);
+        intmaxA.addFirst(4);
+        int re = intmaxA.max();
         assertEquals(re, 8);
     }
 

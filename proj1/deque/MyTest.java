@@ -25,13 +25,13 @@ public class MyTest {
                 B.addFirst(randVal);
             } else if (operationNumber == 2) {
                 // size
-                if(L.size() > 0){
+                if (L.size() > 0) {
                     int LLast = L.removeFirst();
                     int BLast = B.removeFirst();
                     assertEquals(LLast, BLast);
                 }
             } else if (operationNumber == 3) {
-                if(L.size() > 0){
+                if (L.size() > 0) {
                     int LLast = L.removeLast();
                     int BLast = B.removeLast();
                     assertEquals(LLast, BLast);

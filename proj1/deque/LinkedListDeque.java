@@ -3,11 +3,11 @@ package deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class LinkedListDeque<T> implements Deque<T> {
-    public class Node {
-        public Node prev;
-        public T item;
-        public Node next;
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
+    private class Node {
+        private Node prev;
+        private T item;
+        private Node next;
 
         public Node(Node p, T i, Node n) {
             prev = p;
@@ -31,21 +31,14 @@ public class LinkedListDeque<T> implements Deque<T> {
         }
     }
 
-    public Node sentinel;
-    public int size;
+    private Node sentinel;
+    private int size;
 
     public LinkedListDeque() {
         sentinel = new Node(null, null, null);
         sentinel.prev = sentinel;
         sentinel.next = sentinel;
         size = 0;
-    }
-
-    public LinkedListDeque(T x) {
-        sentinel = new Node(null, null, null);
-        sentinel.next = new Node(sentinel, x, sentinel);
-        sentinel.prev = sentinel.next;
-        size = 1;
     }
 
     public void addFirst(T item) {
@@ -60,13 +53,6 @@ public class LinkedListDeque<T> implements Deque<T> {
         sentinel.prev = new Node(temp, item, sentinel);
         temp.next = sentinel.prev;
         size++;
-    }
-
-    public boolean isEmpty() {
-        if (size == 0) {
-            return true;
-        }
-        return false;
     }
 
     public int size() {
@@ -123,7 +109,6 @@ public class LinkedListDeque<T> implements Deque<T> {
         }
         return sentinel.next.get(index);
     }
-
 
     public Iterator<T> iterator() {
         return new LLIterator();

@@ -3,11 +3,11 @@ package deque;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class ArrayDeque<T> implements Deque<T> {
-    T[] items;
-    int size;
-    int first;
-    int last;
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
+    private T[] items;
+    private int size;
+    private int first;
+    private int last;
 
     public ArrayDeque() {
         items = (T[]) new Object[8];
@@ -58,20 +58,10 @@ public class ArrayDeque<T> implements Deque<T> {
             last = (last + 1) % items.length;
             items[last] = item;
         }
-        size ++;
+        size++;
     }
 
-    public boolean isEmpty() {
-        if (size == 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public int size() {
-        return size;
-    }
+    public int size() {return size;}
 
     public void printDeque() {
         int count = 0;
@@ -120,14 +110,6 @@ public class ArrayDeque<T> implements Deque<T> {
         }
         return items[(first + index) % items.length];
     }
-
-
-    public void replace(int index, T newT) {
-        if (index >= 0 && index < size) {
-            items[(first + index) % items.length] = newT;
-        }
-    }
-
 
     public Iterator<T> iterator() {
         return new ArrayIterator();
