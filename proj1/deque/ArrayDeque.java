@@ -122,6 +122,13 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
 
+    public void replace(int index, T newT) {
+        if (index >= 0 && index < size) {
+            items[(first + index) % items.length] = newT;
+        }
+    }
+
+
     public Iterator<T> iterator() {
         return new ArrayIterator();
     }
