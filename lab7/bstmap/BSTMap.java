@@ -7,7 +7,7 @@ import java.util.TreeSet;
 
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>{
-    BSTNode root;
+    private BSTNode root;
 
     private class BSTNode {
         K key;
