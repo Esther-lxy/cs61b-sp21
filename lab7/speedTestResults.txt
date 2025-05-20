@@ -1,0 +1,16 @@
+String Length = 8:
+Number of Strings; ULLMap; BSTMap; Java's Built-in TreeMap; Java's Built-in HashMap
+10000; 0.26; 0.02; 0.01; 0.00;
+20000; 0.99; 0.01; 0.01; 0.00;
+40000; 5.22; 0.03; 0.02; 0.01;
+60000; Stack Overflow; 0.05; 0.03; 0.01;
+80000; Stack Overflow; 0.06; 0.03; 0.01;
+
+
+String Length = 8:
+Number of Strings; ULLMap; BSTMap; Java's Built-in TreeMap; Java's Built-in HashMap
+10000; 0.25; 0.01; 0.00; 0.00;
+20000; 1.03; 0.01; 0.01; 0.01;
+40000; 5.42; 0.03; 0.01; 0.01;
+60000; Stack Overflow; 0.07; 0.03; 0.01;
+80000; Stack Overflow; 0.06; 0.03; 0.03;

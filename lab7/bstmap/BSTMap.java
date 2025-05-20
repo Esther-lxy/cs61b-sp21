@@ -3,10 +3,10 @@ package bstmap;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 
 public class BSTMap<K extends Comparable, V> implements Map61B<K, V>{
-    int size;
     BSTNode root;
 
     private class BSTNode {
@@ -24,7 +24,6 @@ public class BSTMap<K extends Comparable, V> implements Map61B<K, V>{
     }
 
     BSTMap() {
-        size = 0;
         root = null;
     }
 
@@ -32,7 +31,6 @@ public class BSTMap<K extends Comparable, V> implements Map61B<K, V>{
     @Override
     public void clear() {
         root = null;
-        size = 0;
     };
 
     /* Returns true if this map contains a mapping for the specified key. */
@@ -68,31 +66,22 @@ public class BSTMap<K extends Comparable, V> implements Map61B<K, V>{
     /* Returns the number of key-value mappings in this map. */
     @Override
     public int size() {
-        return size;
+        if (root == null) {
+            return 0;
+        } else {
+            return 1 + root.left.size() + root.right.size();
+        }
     };
 
     /* Associates the specified value with the specified key in this map. */
     @Override
     public void put(K key, V value) {
-        if (containsKey(key)) {
-            PurePut(key, value);
-        } else {
-            PutPlus(key, value);
-        }
-    }
-
-    private void PutPlus(K key, V value) {
-        size++;
-        PurePut(key, value);
-    }
-
-    private void PurePut(K key, V value) {
         if (root == null) {
             root = new BSTNode(key, value);
         } else if(key.compareTo(root.key) < 0) {
-            root.left.PurePut(key, value);
+            root.left.put(key, value);
         } else if (key.compareTo(root.key) > 0){
-            root.right.PurePut(key, value);
+            root.right.put(key, value);
         } else {
             root.value = value;
         }
@@ -109,27 +98,97 @@ public class BSTMap<K extends Comparable, V> implements Map61B<K, V>{
      * If you don't implement this, throw an UnsupportedOperationException. */
     @Override
     public Set<K> keySet() {
-        throw new UnsupportedOperationException();
+        TreeSet<K> keys = new TreeSet<K>();
+        if (root == null) {
+        } else {
+            keys.addAll(root.left.keySet());
+            keys.add(root.key);
+            keys.addAll(root.right.keySet());
+        }
+        return keys;
     };
+
+    @Override
+    /*return an iterator over the keys */
+    public Iterator<K> iterator() {
+        return keySet().iterator();
+    }
+
+    /*
+    private class KeysIterator implements Iterator<K> {
+        K current ;
+        int rest = size;
+        KeysIterator() {
+            current = root.key;
+        }
+        @Override
+        public boolean hasNext() {
+            if (size == 0) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        @Override
+        public K next() {
+            return null;
+        }
+    } */
 
     /* Removes the mapping for the specified key from this map if present.
      * Not required for Lab 7. If you don't implement this, throw an
      * UnsupportedOperationException. */
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+        if (root == null) {
+            return null;
+        }
+        if (root.key == key) {
+            V ReturnValue = root.value;
+            if (root.left.root == null && root.right.root == null) {
+                root = null;
+            } else if (root.left.root == null) {
+                root = root.right.root;
+            } else if (root.right.root == null) {
+                root = root.left.root;
+            } else {
+                K largest = root.left.FindLargest();
+                V value = root.left.get(largest);
+                root.left.remove(largest);
+                root.key = largest;
+                root.value = value;
+            }
+            return ReturnValue;
+        } else if (key.compareTo(root.key) < 0){
+            return root.left.remove(key);
+        } else {
+            return root.right.remove(key);
+        }
     };
+
+    private K FindLargest() {
+        if (root == null) {
+            return null;
+        }
+        BSTMap<K, V> current = this;
+        K largest = current.root.key;
+        while (current.root != null) {
+            largest = current.root.key;
+            current = current.root.right;
+        }
+        return largest;
+    }
 
     /* Removes the entry for the specified key only if it is currently mapped to
      * the specified value. Not required for Lab 7. If you don't implement this,
      * throw an UnsupportedOperationException.*/
     @Override
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException();
+        if (get(key) == value) {
+            return remove(key);
+        } else {
+            return null;
+        }
     };
-
-    @Override
-    public Iterator<K> iterator() {
-        throw new UnsupportedOperationException();
-    }
 }
