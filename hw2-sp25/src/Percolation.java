@@ -5,11 +5,10 @@ import java.util.*;
 
 public class Percolation {
     // TODO: Add any necessary instance variables.
-    int openSites;
-    int side;
-    Site[] grid;
-    WeightedQuickUnionUF Sets;
-    boolean isPercolate;
+    private int openSites;
+    private int side;
+    private Site[] grid;
+    private WeightedQuickUnionUF Sets;
 
     private class Site {
         boolean isFull;
@@ -86,15 +85,6 @@ public class Percolation {
     }
 
     // TODO: Add any useful helper methods (we highly recommend this!).
-    private int[] getCoordinates(int SetIndex) {
-        int coordinates[] = new int[2];
-        int row = SetIndex / side;
-        int column = SetIndex % side;
-        coordinates[0] = row;
-        coordinates[1] = column;
-        return coordinates;
-    }
-
     private int getSetIndex(int row, int col) {
         return row * side + col;
     }

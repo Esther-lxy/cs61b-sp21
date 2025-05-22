@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PercolationTest {
@@ -8,7 +9,7 @@ public class PercolationTest {
     /**
      * Enum to represent the state of a cell in the grid. Use this enum to help you write tests.
      * <p>
-     * (0) CLOSED: isOpen() returns true, isFull() return false
+     * (0) CLOSED: isOpen() returns false, isFull() return false
      * <p>
      * (1) OPEN: isOpen() returns true, isFull() returns false
      * <p>
@@ -82,7 +83,34 @@ public class PercolationTest {
     //       write some more tests and delete the fail() line
     @Test
     public void yourFirstTestHere() {
-        fail("Did you write your own tests?");
+        int N = 4;
+        Percolation p = new Percolation(N);
+        // open sites at (r, c) = (3, 0), (3, 1), (1, 2), (1, 3), (0, 3), (0, 3)
+        p.open(3, 0);
+        p.open(0, 2);
+        p.open(1, 3);
+        p.open(2, 1);
+        p.open(0, 3);
+        p.open(2, 2);
+        p.open(3, 1);
+        Cell[][] expectedState = {
+                {Cell.CLOSED, Cell.CLOSED, Cell.FULL, Cell.FULL},
+                {Cell.CLOSED, Cell.CLOSED, Cell.CLOSED, Cell.FULL},
+                {Cell.CLOSED, Cell.OPEN, Cell.OPEN, Cell.CLOSED},
+                {Cell.OPEN, Cell.OPEN, Cell.CLOSED, Cell.CLOSED}
+        };
+        assertThat(getState(N, p)).isEqualTo(expectedState);
+        assertEquals(p.numberOfOpenSites(), 7);
+        assertEquals(p.percolates(), false);
+        p.open(1, 2);
+        Cell[][] expectedState2 = {
+                {Cell.CLOSED, Cell.CLOSED, Cell.FULL, Cell.FULL},
+                {Cell.CLOSED, Cell.CLOSED, Cell.FULL, Cell.FULL},
+                {Cell.CLOSED, Cell.FULL, Cell.FULL, Cell.CLOSED},
+                {Cell.FULL, Cell.FULL, Cell.CLOSED, Cell.CLOSED}
+        };
+        assertThat(getState(N, p)).isEqualTo(expectedState2);
+        assertEquals(p.numberOfOpenSites(), 8);
+        assertEquals(p.percolates(), true);
     }
-
 }
