@@ -31,7 +31,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     private int NumberOfBuckets = 16;
     private int size = 0;
     private double loadFactor = 0.75;
-    Set<K> keySet = new HashSet<>();
+    private Set<K> keySet = new HashSet<>();
 
 
     /** Constructors */
