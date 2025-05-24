@@ -1,6 +1,6 @@
 package hashmap;
 
-import java.util.Collection;
+import java.util.*;
 
 /**
  *  A hash table-backed Map implementation. Provides amortized constant time
@@ -28,11 +28,23 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     /* Instance Variables */
     private Collection<Node>[] buckets;
     // You should probably define some more!
+    private int NumberOfBuckets = 16;
+    private int size = 0;
+    private double loadFactor = 0.75;
+    Set<K> keySet = new HashSet<>();
+
 
     /** Constructors */
-    public MyHashMap() { }
+    public MyHashMap() {
+        buckets = createTable(NumberOfBuckets);
+        FillBuckets();
+    }
 
-    public MyHashMap(int initialSize) { }
+    public MyHashMap(int initialSize) {
+        NumberOfBuckets = initialSize;
+        buckets = createTable(NumberOfBuckets);
+        FillBuckets();
+    }
 
     /**
      * MyHashMap constructor that creates a backing array of initialSize.
@@ -41,13 +53,23 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * @param initialSize initial size of backing array
      * @param maxLoad maximum load factor
      */
-    public MyHashMap(int initialSize, double maxLoad) { }
+    public MyHashMap(int initialSize, double maxLoad) {
+        NumberOfBuckets = initialSize;
+        loadFactor = maxLoad;
+        buckets = createTable(NumberOfBuckets);
+        FillBuckets();
+    }
 
+    private void FillBuckets() {
+        for (int i = 0; i < buckets.length; i++) {
+            buckets[i] = createBucket();
+        }
+    }
     /**
      * Returns a new node to be placed in a hash table bucket
      */
     private Node createNode(K key, V value) {
-        return null;
+        return new Node(key, value);
     }
 
     /**
@@ -69,7 +91,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * OWN BUCKET DATA STRUCTURES WITH THE NEW OPERATOR!
      */
     protected Collection<Node> createBucket() {
-        return null;
+        return new LinkedList<>();
     }
 
     /**
@@ -82,10 +104,128 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * @param tableSize the size of the table to create
      */
     private Collection<Node>[] createTable(int tableSize) {
-        return null;
+        return new Collection[tableSize];
     }
 
     // TODO: Implement the methods of the Map61B Interface below
     // Your code won't compile until you do so!
 
+    private int BucketIndex(K key) {
+        return Math.floorMod(key.hashCode(), NumberOfBuckets);
+    }
+
+    /** Removes all of the mappings from this map. */
+    public void clear() {
+        for(int i = 0; i < buckets.length; i++) {
+            buckets[i] = createBucket();
+        }
+        size = 0;
+    }
+
+    /** Returns true if this map contains a mapping for the specified key. */
+    public boolean containsKey(K key) {
+        int index = BucketIndex(key);
+        for (Node N: buckets[index]) {
+            if (N.key.equals(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the value to which the specified key is mapped, or null if this
+     * map contains no mapping for the key.
+     */
+    public V get(K key) {
+        int index = BucketIndex(key);
+        for (Node N: buckets[index]) {
+            if (N.key.equals(key)) {
+                return N.value;
+            }
+        }
+        return null;
+    };
+
+    /** Returns the number of key-value mappings in this map. */
+    public int size() {
+        return size;
+    };
+
+    /**
+     * Associates the specified value with the specified key in this map.
+     * If the map previously contained a mapping for the key,
+     * the old value is replaced.
+     */
+    public void put(K key, V value) {
+        int index = BucketIndex(key);
+        for (Node N: buckets[index]) {
+            if (N.key.equals(key)) {
+                N.value = value;
+                return;
+            }
+        }
+        buckets[index].add(createNode(key, value));
+        size++;
+        keySet.add(key);
+        if (size / NumberOfBuckets >= loadFactor) {
+            ResizeBuckets();
+        }
+    };
+
+    private void ResizeBuckets() {
+        MyHashMap<K,V> NewHashMap = new MyHashMap<>(NumberOfBuckets * 2, loadFactor);
+        Set<K> oldKeys = keySet();
+        for(K key : oldKeys) {
+            NewHashMap.put(key, this.get(key));
+        }
+        this.buckets = NewHashMap.buckets;
+        this.NumberOfBuckets = NumberOfBuckets * 2;
+    }
+
+    /** Returns a Set view of the keys contained in this map. */
+    public Set<K> keySet() {
+        return keySet;
+    };
+
+    /**
+     * Removes the mapping for the specified key from this map if present.
+     * Not required for Lab 8. If you don't implement this, throw an
+     * UnsupportedOperationException.
+     */
+    public V remove(K key) {
+        int index = BucketIndex(key);
+        for (Node N : buckets[index]) {
+            if (N.key.equals(key)) {
+                buckets[index].remove(N);
+                size--;
+                keySet.remove(key);
+                return N.value;
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Removes the entry for the specified key only if it is currently mapped to
+     * the specified value. Not required for Lab 8. If you don't implement this,
+     * throw an UnsupportedOperationException.
+     */
+    public V remove(K key, V value) {
+        int index = BucketIndex(key);
+        for (Node N : buckets[index]) {
+            if (N.key.equals(key) && N.value.equals(value)) {
+                buckets[index].remove(N);
+                size--;
+                keySet.remove(key);
+                return N.value;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Iterator<K> iterator() {
+        return keySet.iterator();
+    }
 }
