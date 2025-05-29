@@ -3,6 +3,7 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 import java.util.*;
 
 public class Percolation {
+    // with Josh's amazing structure
     private int openSites;
     private int side;
     private Site[] grid;
@@ -108,12 +109,7 @@ public class Percolation {
 
 
 
-
-
-
-
-
-    /* Mine original solution
+    /* My original solution
     // TODO: Add any necessary instance variables.
     private int openSites;
     private int side;
