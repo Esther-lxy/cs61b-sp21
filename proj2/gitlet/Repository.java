@@ -231,14 +231,62 @@ public class Repository {
         System.out.println();
 
         System.out.println("=== Untracked Files ===");
-        List<String> cwdFiles = Utils.plainFilenamesIn(CWD);
-        for (String f : cwdFiles) {
-            if ((!staged.contains(f) && !tracked.containsKey(f)) || removal.contains(f)) {
-                System.out.println(f);
-            }
+        List<String> untracked = getUntrackedFiles();
+        Collections.sort(untracked);
+        for (String s : untracked) {
+            System.out.println(s);
         }
         System.out.println();
+    }
 
+    public static void checkout(String filename){
+        String sha1inblob = findsha1(CBsha1,filename);
+        recover(sha1inblob, filename);
+    }
+
+    public static void checkout(String commitid, String filename) {
+        List<String> commits = Utils.plainFilenamesIn(COMMITS_DIR);
+        String RealCommitID = "NoSuchCommit";
+        for (String c : commits) {
+            if (commitid.equals(c) || commitid.equals(c.substring(0, 6))) {
+                RealCommitID = c;
+            }
+        }
+        if (RealCommitID == "NoSuchCommit") {
+            throw new GitletException("No commit with that id exists.");
+        }
+        String sha1inblob = findsha1(RealCommitID,filename);
+        recover(sha1inblob, filename);
+    }
+
+    public static void checkoutBranch(String branch) {
+        if (branch.equals(CBname)) {
+            throw new GitletException("No need to checkout the current branch.");
+        }
+        if (!branches.containsKey(branch)) {
+            throw new GitletException("No such branch exists.");
+        }
+
+        String commitid = branches.get(branch);
+
+
+    }
+
+    public static String findsha1(String commitid, String filename) {
+        Commit c = getCommit(commitid);
+        String sha1 = c.getBlobSha1(filename);
+        if (sha1 == null) {
+            throw new GitletException("File does not exist in that commit.");
+        } else {
+            return sha1;
+        }
+    }
+
+    public static void recover(String blobsha1, String filename) {
+        File cwdf = join(CWD, filename);
+        File tocheck = join(BLOBS_DIR, blobsha1);
+        byte[] content = Utils.readContents(tocheck);
+        Utils.writeContents(cwdf, content);
     }
 
     public static boolean sha1Equals(File file1, File file2) {
@@ -259,5 +307,19 @@ public class Repository {
         File CCFile = join(COMMITS_DIR, sha1);
         Commit CurrentCommit = readObject(CCFile, Commit.class);
         return CurrentCommit;
+    }
+
+    public static List<String> getUntrackedFiles() {
+        List<String> untracked = new ArrayList<>();
+        Commit CurrentCommit = getCommit(CBsha1);
+        TreeMap<String, String> CommitTracked = CurrentCommit.Blobs();
+        List<String> staged = Utils.plainFilenamesIn(STAGING_DIR);
+        List<String> cwdFiles = Utils.plainFilenamesIn(CWD);
+        for (String f : cwdFiles) {
+            if ((!staged.contains(f) && !CommitTracked.containsKey(f)) || removal.contains(f)) {
+                untracked.addLast(f);
+            }
+        }
+        return untracked;
     }
 }
