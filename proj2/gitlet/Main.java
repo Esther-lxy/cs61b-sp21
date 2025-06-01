@@ -46,6 +46,29 @@ public class Main {
                 String MessageToFind = args[2];
                 Repository.find(MessageToFind);
                 break;
+            case "status":
+                Repository.status();
+                break;
+            case "checkout":
+                if (args.length == 2) {
+                    Repository.checkoutBranch(args[1]);
+                } else if (args.length == 3) {
+                    Repository.checkout(args[2]);
+                } else if (args.length == 4) {
+                    Repository.checkout(args[2], args[3]);
+                }
+                break;
+            case "branch":
+                Repository.CreateBranch(args[1]);
+                break;
+            case "rm-branch":
+                Repository.RemoveBranch(args[1]);
+                break;
+            case "reset":
+                Repository.Reset(args[1]);
+                break;
+            case "merge":
+                Repository.merge(args[1]);
         }
     }
 }

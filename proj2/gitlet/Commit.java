@@ -60,6 +60,11 @@ public class Commit implements Serializable {
         }
     }
 
+    public Commit(String m, long stamp, String p1sha1, String p2sha1) {
+        this(m, stamp, p1sha1);
+        parent2SHA = p2sha1;
+    }
+
     public String getBlobSha1(String filename) {
         return containedblobs.get(filename);
     }
@@ -116,5 +121,16 @@ public class Commit implements Serializable {
 
     public String getMessage() {
         return message;
+    }
+
+    public List<String> parents() {
+        List<String> p = new ArrayList<>();
+        if (parent1SHA != null) {
+            p.add(parent1SHA);
+        }
+        if (parent2SHA != null) {
+            p.add(parent2SHA);
+        }
+        return p;
     }
 }
