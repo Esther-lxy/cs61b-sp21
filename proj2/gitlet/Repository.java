@@ -21,7 +21,7 @@ public class Repository {
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided two examples for you.
      */
-    private static TreeMap<String, String> branches;
+    private static TreeMap<String, String> branches = new TreeMap<>();
     private static String CBsha1;
     private static String CBname;
     private static List<String> removal = new ArrayList<>();
