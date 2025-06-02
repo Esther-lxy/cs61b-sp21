@@ -1,6 +1,9 @@
 package gitlet;
 
+// import org.antlr.v4.runtime.tree.Tree;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -21,11 +24,6 @@ public class Repository {
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided two examples for you.
      */
-    private static TreeMap<String, String> branches = new TreeMap<>();
-    private static String CBsha1;
-    private static String CBname;
-    private static List<String> removal = new ArrayList<>();
-
     /** The current working directory. */
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
@@ -33,6 +31,11 @@ public class Repository {
     public static final File COMMITS_DIR = join(GITLET_DIR, "commits");
     public static final File BLOBS_DIR = join(GITLET_DIR, "blob");
     public static final File STAGING_DIR = join(GITLET_DIR, "staging");
+    public static final File REMOVAL = join(GITLET_DIR, "removal");
+    public static final File BRANCHES = join(GITLET_DIR, "branches");
+    public static final File HEAD = join(GITLET_DIR, "head");
+    public static final File HEAD_ID = join(GITLET_DIR, "head", "id");
+    public static final File HEAD_NAME = join(GITLET_DIR, "head", "name");
 
     /* TODO: fill in the rest of this class. */
     // Constructor: if there is already .gitlet file in CWD, abort
@@ -45,15 +48,44 @@ public class Repository {
         BLOBS_DIR.mkdir();
         COMMITS_DIR.mkdir();
         STAGING_DIR.mkdir();
+        HEAD.mkdir();
+
+        try {
+            REMOVAL.createNewFile();
+        } catch (IOException e) {
+            System.out.println("Create new File failed");
+        }
+
+        try {
+            BRANCHES.createNewFile();
+        } catch (IOException e) {
+            System.out.println("Create new File failed");
+        }
+
+        try {
+            HEAD_ID.createNewFile();
+        } catch (IOException e) {
+            System.out.println("Create new File failed");
+        }
+
+        try {
+            HEAD_NAME.createNewFile();
+        } catch (IOException e) {
+            System.out.println("Create new File failed");
+        }
 
         Date initialTime = new Date(0);
         long timestamp = initialTime.getTime();
         Commit initial = new Commit("initial commit", timestamp);
         String sha1 = initial.SaveCommit();
         String defaultBranch = "master";
+        TreeMap<String, String> branches = new TreeMap<>();
         branches.put(defaultBranch, sha1);
-        CBsha1 = sha1;
-        CBname = defaultBranch;
+        ArrayList<String> removal = new ArrayList<>();
+        Utils.writeObject(REMOVAL, removal);
+        Utils.writeObject(BRANCHES, branches);
+        Utils.writeObject(HEAD_ID, sha1);
+        Utils.writeObject(HEAD_NAME, defaultBranch);
     }
 
     public static void Staging(String filename) {
@@ -63,11 +95,11 @@ public class Repository {
         }
         String sha1 = sha1Offile(f);
         byte[] content = Utils.readContents(f);
-
         /* If the current working version of the file is identical to the version in the current commit,
         do not stage it to be added, and remove it from the staging area if it is already there
         (as can happen when a file is changed, added, and then changed back to it’s original version).
          */
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         Commit CurrentCommit = getCommit(CBsha1);
         String CCVersionSha1 = CurrentCommit.getBlobSha1(filename);
         File Instage = join(STAGING_DIR, filename);
@@ -83,18 +115,22 @@ public class Repository {
         /*The file will no longer be staged for removal (see gitlet rm),
         if it was at the time of the command.
          */
+        ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
         if (removal.contains(filename)) {
             removal.remove(filename);
         }
+        Utils.writeObject(REMOVAL, removal);
     }
 
     public static void MakeCommit(String message) {
         List<String> stagedFiles = Utils.plainFilenamesIn(STAGING_DIR);
-        if (stagedFiles.size() == 0 || removal.size() == 0) {
+        ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
+        if (stagedFiles.size() == 0 && removal.size() == 0) {
             throw new GitletException("No changes added to the commit.");
         }
         Date initialTime = new Date();
         long timestamp = initialTime.getTime();
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         Commit NewCommit = new Commit(message, timestamp, CBsha1);
 
         ProcessForCommit(NewCommit);
@@ -104,11 +140,13 @@ public class Repository {
 
     public static void MakeCommit(String message, String parent2) {
         List<String> stagedFiles = Utils.plainFilenamesIn(STAGING_DIR);
-        if (stagedFiles.size() == 0 || removal.size() == 0) {
+        ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
+        if (stagedFiles.size() == 0 && removal.size() == 0) {
             throw new GitletException("No changes added to the commit.");
         }
         Date initialTime = new Date();
         long timestamp = initialTime.getTime();
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         Commit NewCommit = new Commit(message, timestamp, CBsha1, parent2);
 
         ProcessForCommit(NewCommit);
@@ -133,33 +171,45 @@ public class Repository {
             }
 
             // Clear staging area
-            Utils.restrictedDelete(curr);
+            curr.delete();
         }
 
         // Delete the files staged for removal from commit contained blobs
+        ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
         for (String f : removal) {
             c.deleteBlobs(f);
         }
         // Clear removal list
         removal.clear();
+        Utils.writeObject(REMOVAL, removal);
 
         // move the head pointer to new commit
-        CBsha1 = c.SaveCommit();
+        String CBsha1 = c.SaveCommit();
+        Utils.writeObject(HEAD_ID, CBsha1);
+        TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
+        String CBname = Utils.readObject(HEAD_NAME, String.class);
         branches.put(CBname,CBsha1);
+        Utils.writeObject(BRANCHES, branches);
     }
 
 
     public static void remove(String filename) {
         List<String> stagedfiles = Utils.plainFilenamesIn(STAGING_DIR);
         File CWDfile = join(CWD, filename);
+
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         Commit CurrentCommit = getCommit(CBsha1);
         if (stagedfiles.contains(filename)) {
             File file = join(STAGING_DIR, filename);
             Utils.restrictedDelete(file);
         }
         if (CurrentCommit.BlobsContained(filename)) { //log N, how to achieve constant time
+            ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
             removal.add(filename);
-            Utils.restrictedDelete(CWDfile);
+            Utils.writeObject(REMOVAL, removal);
+            if (CWD.exists()) {
+                Utils.restrictedDelete(CWDfile);
+            }
         }
         if (!stagedfiles.contains(filename) && !CurrentCommit.BlobsContained(filename)) {
             throw new GitletException("No reason to remove the file.");
@@ -167,6 +217,7 @@ public class Repository {
     }
 
     public static void log() {
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         Commit CurrentCommit = getCommit(CBsha1);
         CurrentCommit.Printlog(CBsha1);
     }
@@ -197,6 +248,8 @@ public class Repository {
 
     public static void status() {
         System.out.println("=== Branches ===");
+        TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
+        String CBname = Utils.readObject(HEAD_NAME, String.class);
         for (String b : branches.keySet()) {
             if (b.equals(CBname)) {
                 System.out.println("*" + b);
@@ -215,6 +268,7 @@ public class Repository {
         System.out.println();
 
         System.out.println("=== Removed Files ===");
+        ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
         List<String> removed = new ArrayList<>(removal);
         Collections.sort(removed);
         for (String r : removed) {
@@ -236,6 +290,7 @@ public class Repository {
             }
         }
 
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         Commit CurrentCommit = getCommit(CBsha1);
         TreeMap<String, String> tracked = CurrentCommit.Blobs();
         for (Map.Entry<String, String> entry : tracked.entrySet()) {
@@ -264,6 +319,7 @@ public class Repository {
     }
 
     public static void checkout(String filename){
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         String sha1inblob = FindFileinCommit(CBsha1, filename);
         File curr = join(CWD, filename);
         if (!curr.exists() || (curr.exists() && !sha1Offile(curr).equals(sha1inblob))) {
@@ -286,6 +342,8 @@ public class Repository {
     }
 
     public static void checkoutBranch(String branch) {
+        String CBname = Utils.readObject(HEAD_NAME, String.class);
+        TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         if (branch.equals(CBname)) {
             throw new GitletException("No need to checkout the current branch.");
         }
@@ -296,38 +354,51 @@ public class Repository {
         String futurecommitid = branches.get(branch);
         RecoverCommit(futurecommitid);
         ClearStaging();
-        CBname = branch;
-        CBsha1 = futurecommitid;
+        Utils.writeObject(HEAD_NAME, branch);
+        Utils.writeObject(HEAD_ID, futurecommitid);
     }
 
     public static void CreateBranch(String name) {
+        TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         if (branches.containsKey(name)) {
             throw new GitletException("A branch with that name already exists.");
         }
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         branches.put(name, CBsha1);
+        Utils.writeObject(BRANCHES, branches);
     }
 
     public static void RemoveBranch(String name) {
+        String CBname = Utils.readObject(HEAD_NAME, String.class);
+        TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         if (name.equals(CBname)) {
             throw new GitletException("Cannot remove the current branch.");
         } else if (!branches.containsKey(name)) {
             throw new GitletException("A branch with that name does not exist.");
         }
         branches.remove(name);
+        Utils.writeObject(BRANCHES, branches);
     }
 
     public static void Reset(String commitid) {
+        String CBname = Utils.readObject(HEAD_NAME, String.class);
+        TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         String RealID = RealCommit(commitid);
         if(RealID.equals("None")) {
             throw new GitletException("No commit with that id exists.");
         }
         RecoverCommit(RealID);
         branches.put(CBname, RealID);
-        CBsha1 = RealID;
+        Utils.writeObject(BRANCHES, branches);
+        Utils.writeObject(HEAD_ID, RealID);
         ClearStaging();
     }
 
     public static void merge(String branch) {
+        String CBname = Utils.readObject(HEAD_NAME, String.class);
+        ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
+        TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         if (branch.equals(CBname)) {
             throw new GitletException("Cannot merge a branch with itself.");
         }
@@ -455,9 +526,11 @@ public class Repository {
         List<String> staged = Utils.plainFilenamesIn(STAGING_DIR);
         for (String s : staged) {
             File f = join(STAGING_DIR, s);
-            Utils.restrictedDelete(f);
+            f.delete();
         }
+        ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
         removal.clear();
+        Utils.writeObject(REMOVAL, removal);
     }
 
     private static boolean sha1Equals(File file1, File file2) {
@@ -481,6 +554,8 @@ public class Repository {
     }
 
     private static List<String> getUntrackedFiles() {
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
+        ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
         List<String> untracked = new ArrayList<>();
         Commit CurrentCommit = getCommit(CBsha1);
         TreeMap<String, String> CommitTracked = CurrentCommit.Blobs();
@@ -506,6 +581,7 @@ public class Repository {
     }
 
     private static void RecoverCommit(String futurecommitid) {
+        String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         Commit FutureCommit = getCommit(futurecommitid);
         Commit CurrCommit = getCommit(CBsha1);
         List<String> cwd = Utils.plainFilenamesIn(CWD);
@@ -514,7 +590,7 @@ public class Repository {
         Set<String> FilesInFC = FutureCommit.Blobs().keySet();
         Set<String> Untracked = new HashSet<>(FilesinCWD);
 
-        // For untracked files, if it will be deleted or rewriten by checkou, throw an error
+        // For untracked files, if it will be deleted or rewriten by checkout, throw an error
         Untracked.removeAll(FilesInCC);
         for (String f : Untracked) {
             File FileinCWD = join(CWD, f);
@@ -609,4 +685,6 @@ public class Repository {
         }
         Utils.writeContents(newfile, newCon);
     }
+
+
 }

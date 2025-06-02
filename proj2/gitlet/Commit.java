@@ -39,7 +39,7 @@ public class Commit implements Serializable {
     private String parent1SHA;
     private transient Commit parent2;
     private String parent2SHA;
-    private TreeMap<String, String> containedblobs;
+    private TreeMap<String, String> containedblobs = new TreeMap<>();
     private boolean commited = false;
 
     /* TODO: fill in the rest of this class. */

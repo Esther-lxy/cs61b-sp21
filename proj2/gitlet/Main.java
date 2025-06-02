@@ -55,7 +55,7 @@ public class Main {
                 } else if (args.length == 3) {
                     Repository.checkout(args[2]);
                 } else if (args.length == 4) {
-                    Repository.checkout(args[2], args[3]);
+                    Repository.checkout(args[1], args[3]);
                 }
                 break;
             case "branch":
