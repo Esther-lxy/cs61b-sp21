@@ -454,18 +454,18 @@ public class Repository {
         Commit CurrC = getCommit(CBsha1);
         Commit SPC = getCommit(splitP);
 
-        Set<String> FilesinGivenC = GivenC.Blobs().keySet();
-        Set<String> FilesinCurrC = CurrC.Blobs().keySet();
-        Set<String> FilesinSplitP = SPC.Blobs().keySet();
-        List<String> cwd = Utils.plainFilenamesIn(CWD);
-        Set<String> Untracked = new TreeSet<>(cwd);
-        Untracked.remove(FilesinCurrC);
+        Set<String> FilesinGivenC = new TreeSet<>(GivenC.Blobs().keySet());
+        Set<String> FilesinCurrC = new TreeSet<>(CurrC.Blobs().keySet());
+        Set<String> FilesinSplitP = new TreeSet<>(SPC.Blobs().keySet());
+        List<String> cwdf = Utils.plainFilenamesIn(CWD);
+        Set<String> Untracked = new TreeSet<>(cwdf);
+        Untracked.removeAll(FilesinCurrC);
         Set<String> InBoth = new TreeSet<>(FilesinCurrC);
         InBoth.retainAll(FilesinGivenC);
         Set<String> OnlyinGiven = new TreeSet<>(FilesinGivenC);
-        OnlyinGiven.remove(FilesinCurrC);
+        OnlyinGiven.removeAll(FilesinCurrC);
         Set<String> OnlyinCurr = new TreeSet<>(FilesinCurrC);
-        OnlyinCurr.remove(FilesinGivenC);
+        OnlyinCurr.removeAll(FilesinGivenC);
         for (String s : Untracked) {
             File f = join(CWD, s);
             if (FilesinSplitP.contains(s)) {
