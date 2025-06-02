@@ -616,14 +616,16 @@ public class Repository {
 
         // For untracked files, if it will be deleted or rewriten by checkout, throw an error
         Untracked.removeAll(FilesInCC);
+        List<String> staged = Utils.plainFilenamesIn(STAGING_DIR);
+        Set<String> FilesinStaging = new HashSet<>(staged);
+        Untracked.removeAll(FilesinStaging);
         for (String f : Untracked) {
             File FileinCWD = join(CWD, f);
             String sha1inCWD = sha1Offile(FileinCWD);
-            Collection<String> futureblobs = FutureCommit.Blobs().values();
-                if (!futureblobs.contains(sha1inCWD)) {
-                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                    System.exit(0);
-                }
+            String futureblob = FutureCommit.getBlobSha1(f);
+            if (futureblob == null || !futureblob.equals(sha1inCWD) )
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
         }
 
         // For tracked files, delete it if it doesn't exist in Future Commit; rewrite it if it has different sha1 with Future Commit
