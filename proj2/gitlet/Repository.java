@@ -563,7 +563,7 @@ public class Repository {
         List<String> cwdFiles = Utils.plainFilenamesIn(CWD);
         for (String f : cwdFiles) {
             if ((!staged.contains(f) && !CommitTracked.containsKey(f)) || removal.contains(f)) {
-                untracked.addLast(f);
+                untracked.add(f);
             }
         }
         return untracked;
@@ -629,7 +629,7 @@ public class Repository {
 
     private static String SplitPoint(String c1, String c2) {
         TreeSet<String> P1 = Parents(c1);
-        List<String> queue = new ArrayList<>();
+        Deque<String> queue = new LinkedList<>();
         queue.add(c2);
         while (!queue.isEmpty()) {
             String curr = queue.removeFirst();
@@ -647,7 +647,7 @@ public class Repository {
 
     private static TreeSet<String> Parents(String c) {
         TreeSet<String> AllParents = new TreeSet<>();
-        List<String> queue = new ArrayList<>();
+        Deque<String> queue = new LinkedList<>();
         queue.add(c);
         while (!queue.isEmpty()) {
             String curr = queue.removeFirst();
