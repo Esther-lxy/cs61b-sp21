@@ -26,8 +26,8 @@ public class Main {
                 break;
             // TODO: FILL THE REST IN
             case "commit":
-                if (args.length == 1) {
-                    throw new GitletException("Please enter a commit message.");
+                if (args.length == 1 || args[1].equals("")) {
+                    System.out.println("Please enter a commit message.");
                 }
                 String message = args[1];
                 Repository.MakeCommit(message);

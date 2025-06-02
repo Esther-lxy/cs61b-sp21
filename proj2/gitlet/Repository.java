@@ -43,6 +43,7 @@ public class Repository {
     public static void SetupRepo() {
         if (GITLET_DIR.exists()) {
             System.out.println("A Gitlet version-control system already exists in the current directory.");
+            System.exit(0);
         }
         GITLET_DIR.mkdir();
         BLOBS_DIR.mkdir();
@@ -92,6 +93,7 @@ public class Repository {
         File f = join(CWD, filename);
         if (!f.exists()) {
             System.out.println("File does not exist.");
+            System.exit(0);
         }
         String sha1 = sha1Offile(f);
         byte[] content = Utils.readContents(f);
@@ -127,6 +129,7 @@ public class Repository {
         ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
         if (stagedFiles.size() == 0 && removal.size() == 0) {
             System.out.println("No changes added to the commit.");
+            System.exit(0);
         }
         Date initialTime = new Date();
         long timestamp = initialTime.getTime();
@@ -143,6 +146,7 @@ public class Repository {
         ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
         if (stagedFiles.size() == 0 && removal.size() == 0) {
             System.out.println("No changes added to the commit.");
+            System.exit(0);
         }
         Date initialTime = new Date();
         long timestamp = initialTime.getTime();
@@ -213,6 +217,7 @@ public class Repository {
         }
         if (!stagedfiles.contains(filename) && !CurrentCommit.BlobsContained(filename)) {
             System.out.println("No reason to remove the file.");
+            System.exit(0);
         }
     }
 
@@ -243,6 +248,7 @@ public class Repository {
         }
         if (number == 0) {
             System.out.println("Found no commit with that message.");
+            System.exit(0);
         }
     }
 
@@ -323,6 +329,7 @@ public class Repository {
         String sha1inblob = FindFileinCommit(CBsha1, filename);
         if (sha1inblob == null) {
             System.out.println("File does not exist in that commit.");
+            System.exit(0);
         }
         File curr = join(CWD, filename);
         if (!curr.exists() || (curr.exists() && !sha1Offile(curr).equals(sha1inblob))) {
@@ -335,10 +342,12 @@ public class Repository {
 
         if (RealCommitID.equals("None")) {
             System.out.println("No commit with that id exists.");
+            System.exit(0);
         }
         String sha1inblob = FindFileinCommit(RealCommitID, filename);
         if (sha1inblob == null) {
             System.out.println("File does not exist in that commit.");
+            System.exit(0);
         }
 
         File curr = join(CWD, filename);
@@ -352,9 +361,11 @@ public class Repository {
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         if (branch.equals(CBname)) {
             System.out.println("No need to checkout the current branch.");
+            System.exit(0);
         }
         if (!branches.containsKey(branch)) {
             System.out.println("No such branch exists.");
+            System.exit(0);
         }
 
         String futurecommitid = branches.get(branch);
@@ -368,6 +379,7 @@ public class Repository {
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         if (branches.containsKey(name)) {
             System.out.println("A branch with that name already exists.");
+            System.exit(0);
         }
         String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         branches.put(name, CBsha1);
@@ -379,8 +391,10 @@ public class Repository {
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         if (name.equals(CBname)) {
             System.out.println("Cannot remove the current branch.");
+            System.exit(0);
         } else if (!branches.containsKey(name)) {
             System.out.println("A branch with that name does not exist.");
+            System.exit(0);
         }
         branches.remove(name);
         Utils.writeObject(BRANCHES, branches);
@@ -392,6 +406,7 @@ public class Repository {
         String RealID = RealCommit(commitid);
         if(RealID.equals("None")) {
             System.out.println("No commit with that id exists.");
+            System.exit(0);
         }
         RecoverCommit(RealID);
         branches.put(CBname, RealID);
@@ -407,23 +422,28 @@ public class Repository {
         String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         if (branch.equals(CBname)) {
             System.out.println("Cannot merge a branch with itself.");
+            System.exit(0);
         }
 
         if (!removal.isEmpty()) {
             System.out.println("You have uncommitted changes.");
+            System.exit(0);
         }
         List<String> staged = Utils.plainFilenamesIn(STAGING_DIR);
         if (!staged.isEmpty()) {
             System.out.println("You have uncommitted changes.");
+            System.exit(0);
         }
 
         String GivenID = branches.get(branch);
         if (GivenID == null) {
             System.out.println("A branch with that name does not exist.");
+            System.exit(0);
         }
         String splitP = SplitPoint(CBsha1, GivenID);
         if (splitP.equals(GivenID)) {
             System.out.println("Given branch is an ancestor of the current branch.");
+            System.exit(0);
         }
         if (splitP.equals(CBname)) {
             checkoutBranch(branch);
@@ -451,10 +471,12 @@ public class Repository {
             if (FilesinSplitP.contains(s)) {
                 if (!GivenC.getBlobSha1(s).equals(SPC.getBlobSha1(s))) {
                     System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.exit(0);
                 }
             } else {
                 if (OnlyinGiven.contains(s) && !sha1Offile(f).equals(GivenC.getBlobSha1(s))) {
                     System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.exit(0);
                 }
             }
 
