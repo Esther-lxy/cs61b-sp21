@@ -11,7 +11,8 @@ public class Main {
     public static void main(String[] args) {
         // TODO: what if args is empty?
         if (args.length == 0) {
-            throw new GitletException("Please enter a command.");
+            System.out.println("Please enter a command.");
+            System.exit(0);
         }
         String firstArg = args[0];
         switch(firstArg) {
@@ -28,6 +29,7 @@ public class Main {
             case "commit":
                 if (args.length == 1 || args[1].equals("")) {
                     System.out.println("Please enter a commit message.");
+                    System.exit(0);
                 }
                 String message = args[1];
                 Repository.MakeCommit(message);
@@ -43,7 +45,7 @@ public class Main {
                 Repository.global_log();
                 break;
             case "find":
-                String MessageToFind = args[2];
+                String MessageToFind = args[1];
                 Repository.find(MessageToFind);
                 break;
             case "status":
@@ -53,6 +55,10 @@ public class Main {
                 if (args.length == 2) {
                     Repository.checkoutBranch(args[1]);
                 } else if (args.length == 3) {
+                    if (!args[1].equals("--")) {
+                        System.out.println("Incorrect operands.");
+                        System.exit(0);
+                    }
                     Repository.checkout(args[2]);
                 } else if (args.length == 4) {
                     Repository.checkout(args[1], args[3]);

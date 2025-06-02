@@ -621,10 +621,12 @@ public class Repository {
             String sha1inCWD = sha1Offile(FileinCWD);
             String sha1inFutureBlob = FutureCommit.getBlobSha1(f);
             if(!FutureCommit.BlobsContained(f)) {
-                throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
             }
             if (!sha1inFutureBlob.equals(sha1inCWD)) {
-                throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
             }
         }
 
