@@ -610,8 +610,8 @@ public class Repository {
         Commit CurrCommit = getCommit(CBsha1);
         List<String> cwd = Utils.plainFilenamesIn(CWD);
         Set<String> FilesinCWD = new HashSet<>(cwd);
-        Set<String> FilesInCC = CurrCommit.Blobs().keySet();
-        Set<String> FilesInFC = FutureCommit.Blobs().keySet();
+        Set<String> FilesInCC = new HashSet<>(CurrCommit.Blobs().keySet());
+        Set<String> FilesInFC = new HashSet<>(FutureCommit.Blobs().keySet());
         Set<String> Untracked = new HashSet<>(FilesinCWD);
 
         // For untracked files, if it will be deleted or rewriten by checkout, throw an error
@@ -619,15 +619,11 @@ public class Repository {
         for (String f : Untracked) {
             File FileinCWD = join(CWD, f);
             String sha1inCWD = sha1Offile(FileinCWD);
-            String sha1inFutureBlob = FutureCommit.getBlobSha1(f);
-            if(!FutureCommit.BlobsContained(f)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                System.exit(0);
-            }
-            if (!sha1inFutureBlob.equals(sha1inCWD)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                System.exit(0);
-            }
+            Collection<String> futureblobs = FutureCommit.Blobs().values();
+                if (!futureblobs.contains(sha1inCWD)) {
+                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.exit(0);
+                }
         }
 
         // For tracked files, delete it if it doesn't exist in Future Commit; rewrite it if it has different sha1 with Future Commit
@@ -699,11 +695,11 @@ public class Repository {
             File GivenFile = join(BLOBS_DIR, GivenblobID);
             String CurrCon = Utils.readContentsAsString(CurrFile);
             String GivenCon = Utils.readContentsAsString(GivenFile);
-            newCon = "<<<<<<< HEAD" + "\n" + CurrCon + "=======" + "\n" + GivenCon + ">>>>>>>";
+            newCon = "<<<<<<< HEAD" + "\n" + CurrCon + "\n" + "=======" + "\n" + GivenCon + ">>>>>>>";
         } else if (CurrblobID != null && GivenblobID == null) {
             File CurrFile = join(BLOBS_DIR, CurrblobID);
             String CurrCon = Utils.readContentsAsString(CurrFile);
-            newCon = "<<<<<<< HEAD" + "\n" + CurrCon + "=======" + "\n" + ">>>>>>>";
+            newCon = "<<<<<<< HEAD" + "\n" + CurrCon + "\n"+ "=======" + "\n" + ">>>>>>>";
         } else {
             File GivenFile = join(BLOBS_DIR, GivenblobID);
             String GivenCon = Utils.readContentsAsString(GivenFile);
