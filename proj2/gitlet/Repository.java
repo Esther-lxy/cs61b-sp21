@@ -42,7 +42,7 @@ public class Repository {
     // Otherwise: create .gitlet file, set default branch, create initial commit and save it
     public static void SetupRepo() {
         if (GITLET_DIR.exists()) {
-            throw new GitletException("A Gitlet version-control system already exists in the current directory.");
+            System.out.println("A Gitlet version-control system already exists in the current directory.");
         }
         GITLET_DIR.mkdir();
         BLOBS_DIR.mkdir();
@@ -91,7 +91,7 @@ public class Repository {
     public static void Staging(String filename) {
         File f = join(CWD, filename);
         if (!f.exists()) {
-            throw new GitletException("File does not exist.");
+            System.out.println("File does not exist.");
         }
         String sha1 = sha1Offile(f);
         byte[] content = Utils.readContents(f);
@@ -126,7 +126,7 @@ public class Repository {
         List<String> stagedFiles = Utils.plainFilenamesIn(STAGING_DIR);
         ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
         if (stagedFiles.size() == 0 && removal.size() == 0) {
-            throw new GitletException("No changes added to the commit.");
+            System.out.println("No changes added to the commit.");
         }
         Date initialTime = new Date();
         long timestamp = initialTime.getTime();
@@ -142,7 +142,7 @@ public class Repository {
         List<String> stagedFiles = Utils.plainFilenamesIn(STAGING_DIR);
         ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
         if (stagedFiles.size() == 0 && removal.size() == 0) {
-            throw new GitletException("No changes added to the commit.");
+            System.out.println("No changes added to the commit.");
         }
         Date initialTime = new Date();
         long timestamp = initialTime.getTime();
@@ -201,7 +201,7 @@ public class Repository {
         Commit CurrentCommit = getCommit(CBsha1);
         if (stagedfiles.contains(filename)) {
             File file = join(STAGING_DIR, filename);
-            Utils.restrictedDelete(file);
+            file.delete();
         }
         if (CurrentCommit.BlobsContained(filename)) { //log N, how to achieve constant time
             ArrayList<String> removal = Utils.readObject(REMOVAL, ArrayList.class);
@@ -212,7 +212,7 @@ public class Repository {
             }
         }
         if (!stagedfiles.contains(filename) && !CurrentCommit.BlobsContained(filename)) {
-            throw new GitletException("No reason to remove the file.");
+            System.out.println("No reason to remove the file.");
         }
     }
 
@@ -242,7 +242,7 @@ public class Repository {
             }
         }
         if (number == 0) {
-            throw new GitletException("Found no commit with that message.");
+            System.out.println("Found no commit with that message.");
         }
     }
 
@@ -321,6 +321,9 @@ public class Repository {
     public static void checkout(String filename){
         String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         String sha1inblob = FindFileinCommit(CBsha1, filename);
+        if (sha1inblob == null) {
+            System.out.println("File does not exist in that commit.");
+        }
         File curr = join(CWD, filename);
         if (!curr.exists() || (curr.exists() && !sha1Offile(curr).equals(sha1inblob))) {
             RecoverFile(sha1inblob, filename);
@@ -331,9 +334,12 @@ public class Repository {
         String RealCommitID = RealCommit(commitid);
 
         if (RealCommitID.equals("None")) {
-            throw new GitletException("No commit with that id exists.");
+            System.out.println("No commit with that id exists.");
         }
         String sha1inblob = FindFileinCommit(RealCommitID, filename);
+        if (sha1inblob == null) {
+            System.out.println("File does not exist in that commit.");
+        }
 
         File curr = join(CWD, filename);
         if (!curr.exists() || (curr.exists() && !sha1Offile(curr).equals(sha1inblob))) {
@@ -345,10 +351,10 @@ public class Repository {
         String CBname = Utils.readObject(HEAD_NAME, String.class);
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         if (branch.equals(CBname)) {
-            throw new GitletException("No need to checkout the current branch.");
+            System.out.println("No need to checkout the current branch.");
         }
         if (!branches.containsKey(branch)) {
-            throw new GitletException("No such branch exists.");
+            System.out.println("No such branch exists.");
         }
 
         String futurecommitid = branches.get(branch);
@@ -361,7 +367,7 @@ public class Repository {
     public static void CreateBranch(String name) {
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         if (branches.containsKey(name)) {
-            throw new GitletException("A branch with that name already exists.");
+            System.out.println("A branch with that name already exists.");
         }
         String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         branches.put(name, CBsha1);
@@ -372,9 +378,9 @@ public class Repository {
         String CBname = Utils.readObject(HEAD_NAME, String.class);
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         if (name.equals(CBname)) {
-            throw new GitletException("Cannot remove the current branch.");
+            System.out.println("Cannot remove the current branch.");
         } else if (!branches.containsKey(name)) {
-            throw new GitletException("A branch with that name does not exist.");
+            System.out.println("A branch with that name does not exist.");
         }
         branches.remove(name);
         Utils.writeObject(BRANCHES, branches);
@@ -385,7 +391,7 @@ public class Repository {
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         String RealID = RealCommit(commitid);
         if(RealID.equals("None")) {
-            throw new GitletException("No commit with that id exists.");
+            System.out.println("No commit with that id exists.");
         }
         RecoverCommit(RealID);
         branches.put(CBname, RealID);
@@ -400,24 +406,24 @@ public class Repository {
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         String CBsha1 = Utils.readObject(HEAD_ID, String.class);
         if (branch.equals(CBname)) {
-            throw new GitletException("Cannot merge a branch with itself.");
+            System.out.println("Cannot merge a branch with itself.");
         }
 
         if (!removal.isEmpty()) {
-            throw new GitletException("You have uncommitted changes.");
+            System.out.println("You have uncommitted changes.");
         }
         List<String> staged = Utils.plainFilenamesIn(STAGING_DIR);
         if (!staged.isEmpty()) {
-            throw new GitletException("You have uncommitted changes.");
+            System.out.println("You have uncommitted changes.");
         }
 
         String GivenID = branches.get(branch);
         if (GivenID == null) {
-            throw new GitletException("A branch with that name does not exist.");
+            System.out.println("A branch with that name does not exist.");
         }
         String splitP = SplitPoint(CBsha1, GivenID);
         if (splitP.equals(GivenID)) {
-            throw new GitletException("Given branch is an ancestor of the current branch.");
+            System.out.println("Given branch is an ancestor of the current branch.");
         }
         if (splitP.equals(CBname)) {
             checkoutBranch(branch);
@@ -444,11 +450,11 @@ public class Repository {
             File f = join(CWD, s);
             if (FilesinSplitP.contains(s)) {
                 if (!GivenC.getBlobSha1(s).equals(SPC.getBlobSha1(s))) {
-                    throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 }
             } else {
                 if (OnlyinGiven.contains(s) && !sha1Offile(f).equals(GivenC.getBlobSha1(s))) {
-                    throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 }
             }
 
@@ -508,11 +514,7 @@ public class Repository {
     private static String FindFileinCommit(String commitid, String filename) {
         Commit c = getCommit(commitid);
         String sha1 = c.getBlobSha1(filename);
-        if (sha1 == null) {
-            throw new GitletException("File does not exist in that commit.");
-        } else {
-            return sha1;
-        }
+        return sha1;
     }
 
     private static void RecoverFile(String blobsha1, String filename) {
