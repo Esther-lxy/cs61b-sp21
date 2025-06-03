@@ -287,15 +287,15 @@ public class Repository {
         System.out.println();
 
         System.out.println("=== Modifications Not Staged For Commit ===");
-        TreeSet<String> modi = new TreeSet<String>();
+        TreeMap<String, String> modi = new TreeMap<String, String>();
         for (String f : staged) {
             File stagedF = join(STAGING_DIR, f);
             File cwdF = join(CWD, f);
             if (!cwdF.exists()) {
-                modi.add(f);
+                modi.put(f, "deleted");
             } else {
                 if (!sha1Equals(stagedF, cwdF)) {
-                    modi.add(f);
+                    modi.put(f, "modified");
                 }
             }
         }
@@ -307,15 +307,15 @@ public class Repository {
             String name = entry.getKey();
             File cwdF = join(CWD, name);
             if (!cwdF.exists() && !removal.contains(name)) {
-                modi.add(name);
+                modi.put(name, "deleted");
             } else if (cwdF.exists()) {
-                if (staged.contains(name) && !entry.getValue().equals(sha1Offile(cwdF))) {
-                    modi.add(name);
+                if (!staged.contains(name) && !entry.getValue().equals(sha1Offile(cwdF))) {
+                    modi.put(name, "modified");
                 }
             }
         }
-        for (String filename : modi) {
-            System.out.println(filename);
+        for (Map.Entry<String, String> entry : modi.entrySet()) {
+            System.out.println(entry.getKey() + " (" + entry.getValue() +")");
         }
         System.out.println();
 
