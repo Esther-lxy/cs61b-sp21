@@ -253,6 +253,10 @@ public class Repository {
     }
 
     public static void status() {
+        if (!GITLET_DIR.exists()) {
+            System.out.println("Not in an initialized Gitlet directory.");
+            System.exit(0);
+        }
         System.out.println("=== Branches ===");
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         String CBname = Utils.readObject(HEAD_NAME, String.class);
@@ -404,7 +408,7 @@ public class Repository {
         String CBname = Utils.readObject(HEAD_NAME, String.class);
         TreeMap<String, String> branches = Utils.readObject(BRANCHES, TreeMap.class);
         String RealID = RealCommit(commitid);
-        if(RealID.equals("None")) {
+        if (RealID.equals("None")) {
             System.out.println("No commit with that id exists.");
             System.exit(0);
         }
@@ -447,6 +451,8 @@ public class Repository {
         }
         if (splitP.equals(CBname)) {
             checkoutBranch(branch);
+            System.out.println("Current branch fast-forwarded.");
+            System.exit(0);
         }
 
         boolean isConflict = false;
@@ -597,7 +603,7 @@ public class Repository {
         List<String> commits = Utils.plainFilenamesIn(COMMITS_DIR);
         String RealCommitID = "None";
         for (String c : commits) {
-            if (commitid.equals(c) || commitid.equals(c.substring(0, 6))) {
+            if (commitid.substring(0, 6).equals(c.substring(0, 6))) {
                 RealCommitID = c;
             }
         }
@@ -616,16 +622,19 @@ public class Repository {
 
         // For untracked files, if it will be deleted or rewriten by checkout, throw an error
         Untracked.removeAll(FilesInCC);
+        /*
         List<String> staged = Utils.plainFilenamesIn(STAGING_DIR);
         Set<String> FilesinStaging = new HashSet<>(staged);
         Untracked.removeAll(FilesinStaging);
+        */
         for (String f : Untracked) {
             File FileinCWD = join(CWD, f);
             String sha1inCWD = sha1Offile(FileinCWD);
             String futureblob = FutureCommit.getBlobSha1(f);
-            if (futureblob == null || !futureblob.equals(sha1inCWD) )
+            if (futureblob != null && !futureblob.equals(sha1inCWD) ) {
                 System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 System.exit(0);
+            }
         }
 
         // For tracked files, delete it if it doesn't exist in Future Commit; rewrite it if it has different sha1 with Future Commit
