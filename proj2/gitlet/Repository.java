@@ -449,7 +449,7 @@ public class Repository {
             System.out.println("Given branch is an ancestor of the current branch.");
             System.exit(0);
         }
-        if (splitP.equals(CBname)) {
+        if (splitP.equals(CBsha1)) {
             checkoutBranch(branch);
             System.out.println("Current branch fast-forwarded.");
             System.exit(0);
@@ -490,7 +490,7 @@ public class Repository {
 
         for (String s : InBoth) {
             if (FilesinSplitP.contains(s)) {
-                if (SPC.getBlobSha1(s).equals(CurrC.getBlobSha1(s)) && !SPC.getBlobSha1(s).equals(CurrC.getBlobSha1(s))){
+                if (SPC.getBlobSha1(s).equals(CurrC.getBlobSha1(s)) && !SPC.getBlobSha1(s).equals(GivenC.getBlobSha1(s))){
                     checkout(GivenID, s);
                     Staging(s);
                 } else if (!SPC.getBlobSha1(s).equals(CurrC.getBlobSha1(s)) &&
