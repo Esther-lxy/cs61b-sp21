@@ -706,18 +706,16 @@ public class Repository {
             File GivenFile = join(BLOBS_DIR, GivenblobID);
             String CurrCon = Utils.readContentsAsString(CurrFile);
             String GivenCon = Utils.readContentsAsString(GivenFile);
-            newCon = "<<<<<<< HEAD" + "\n" + CurrCon + "=======" + "\n" + GivenCon + ">>>>>>>";
+            newCon = "<<<<<<< HEAD" + "\n" + CurrCon + "=======" + "\n" + GivenCon + ">>>>>>>" + "\n";
         } else if (CurrblobID != null && GivenblobID == null) {
             File CurrFile = join(BLOBS_DIR, CurrblobID);
             String CurrCon = Utils.readContentsAsString(CurrFile);
-            newCon = "<<<<<<< HEAD" + "\n" + CurrCon + "=======" + "\n" + ">>>>>>>";
+            newCon = "<<<<<<< HEAD" + "\n" + CurrCon + "=======" + "\n" + ">>>>>>>" + "\n";
         } else {
             File GivenFile = join(BLOBS_DIR, GivenblobID);
             String GivenCon = Utils.readContentsAsString(GivenFile);
-            newCon = "<<<<<<< HEAD" + "\n" + "=======" + "\n" + GivenCon + ">>>>>>>";
+            newCon = "<<<<<<< HEAD" + "\n" + "=======" + "\n" + GivenCon + ">>>>>>>" + "\n";
         }
         Utils.writeContents(newfile, newCon);
     }
-
-
 }
