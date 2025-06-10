@@ -532,7 +532,7 @@ public class Repository {
             }
         }
 
-        MakeCommit("Merged branch into " + CBname +".", GivenID);
+        MakeCommit("Merged " + branch + " into " + CBname +".", GivenID);
 
         if (isConflict) {
             System.out.println("Encountered a merge conflict.");
@@ -622,11 +622,6 @@ public class Repository {
 
         // For untracked files, if it will be deleted or rewriten by checkout, throw an error
         Untracked.removeAll(FilesInCC);
-        /*
-        List<String> staged = Utils.plainFilenamesIn(STAGING_DIR);
-        Set<String> FilesinStaging = new HashSet<>(staged);
-        Untracked.removeAll(FilesinStaging);
-        */
         for (String f : Untracked) {
             File FileinCWD = join(CWD, f);
             String sha1inCWD = sha1Offile(FileinCWD);
